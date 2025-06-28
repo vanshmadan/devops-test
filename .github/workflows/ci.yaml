@@ -61,8 +61,8 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
-    - name: Start server
-      run: HOST=localhost npm start &
+   # - name: Start server
+   #   run: HOST=localhost npm start &
 
     - name: Run Playwright tests
       run: npx playwright test
