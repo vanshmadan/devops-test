@@ -21,17 +21,22 @@
     "web-vitals": "^2.1.2",
     "whatwg-url": "^11.0.0"
   },
-  "scripts": {
-    "start": "export SET NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
-    "build": "export SET NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+ "scripts": {
+  "start": "export SET NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+  "build": "export SET NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
+  "test": "react-scripts test",
+  "test:e2e": "playwright test",
+  "eject": "react-scripts eject"
+},
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
+  },
+    "devDependencies": {
+    "playwright": "^1.43.0",
+    "@playwright/test": "^1.43.0"
   },
   "browserslist": {
     "production": [
