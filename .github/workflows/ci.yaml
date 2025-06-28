@@ -94,11 +94,11 @@ jobs:
       - name: Run Playwright frontned and Integration Tests
         run: |
           cd naya-web
-          npx playwright test
+          npx playwright test  --reporter=html
 
-      - uses: actions/upload-artifact@v3
-        if: always()
+      - name: Upload Playwright HTML Report
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-results
-          path: playwright-report/
-          retention-days: 3
+          name: playwright-report
+          path: naya-web/playwright-report
+
