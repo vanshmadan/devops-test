@@ -57,9 +57,13 @@ jobs:
     - name: Install Dependencies
       run: npm ci
 
+  
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
+    - name: Start server
+      run: npm start &
+      
     - name: Wait for application to be ready
       run: npx wait-on http://localhost:3000
     
