@@ -14,6 +14,6 @@ export default defineConfig({
     command: 'npm start',
     port: 3000,
     timeout: 240 * 1000,
-    reuseExistingServer: !process.env.CI // Reuse server in local runs
+    reuseExistingServer:true
   },
 });
