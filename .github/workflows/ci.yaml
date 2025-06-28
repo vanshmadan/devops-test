@@ -40,33 +40,58 @@ jobs:
           MONGO_URI: mongodb://localhost:27017/canvasdb
         run: npm test
 
-  frontend-tests:
+  integration-tests:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: naya-web
+    services:
+      mongo:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install Dependencies
-      run: npm ci
+      - name: Install Backend Dependencies
+        run: |
+          cd naya-api
+          npm install
 
-  
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      - name: Start Backend
+        run: |
+          cd naya-api
+          npm run start &
+        env:
+          MONGO_URI: mongodb://localhost:27017/canvasdb
 
-   # - name: Start server
-   #   run: HOST=localhost npm start &
+      - name: Install Frontend Dependencies
+        run: |
+          cd naya-web
+          npm ci
 
-    - name: Run Playwright tests
-      run: npx playwright test
+      - name: Start Frontend
+        run: |
+          cd naya-web
+          HOST=localhost npm start &
 
-    - name: Run Frontend E2E Tests
-      run: npm run test:e2e
-  
+      - name: Wait for Services
+        run: sleep 15  # Replace with health checks later if needed
+
+      - name: Install Playwright Browsers
+        run: |
+          cd naya-web
+          npx playwright install --with-deps
+
+      - name: Run Playwright frontned and Integration Tests
+        run: |
+          cd naya-web
+          npx playwright test
