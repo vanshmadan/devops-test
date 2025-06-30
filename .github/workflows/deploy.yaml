@@ -95,7 +95,7 @@ jobs:
 
       - name: Set Short Commit SHA
         id: vars
-        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -126,4 +126,4 @@ jobs:
         run: |
           cd infra
           terraform init
-          terraform apply -auto-approve -var="mongo_uri=${{ env.MONGO_URI }}" -var="api_image_tag=${{ steps.vars.outputs.sha }}" -var="web_image_tag=${{ steps.vars.outputs.sha }}"
+          terraform apply -auto-approve -var="mongo_uri=${{ secret.MONGO_URI }}" -var="api_image_tag=${{ steps.vars.outputs.sha }}" -var="web_image_tag=${{ steps.vars.outputs.sha }}"
