@@ -108,14 +108,14 @@ jobs:
       - name: Build & Push naya-api Image
         run: |
           cd naya-api
-          docker build -t $API_IMAGE:${{ steps.vars.outputs.sha }} .
-          docker push $API_IMAGE:${{ steps.vars.outputs.sha }}
+          docker build -t $API_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }} .
+          docker push $API_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }}
 
       - name: Build & Push naya-web Image
         run: |
           cd naya-web
-          docker build -t $WEB_IMAGE:${{ steps.vars.outputs.sha }} .
-          docker push $WEB_IMAGE:${{ steps.vars.outputs.sha }}
+          docker build -t $WEB_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }} .
+          docker push $WEB_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
