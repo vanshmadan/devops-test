@@ -1,0 +1,124 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  API_IMAGE: asia-south1-docker.pkg.dev/alien-handler-412515/naya-api/naya-api
+  WEB_IMAGE: asia-south1-docker.pkg.dev/alien-handler-412515/naya-web/naya-web
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+        options: --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    defaults:
+      run:
+        working-directory: naya-api
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Backend Tests
+        env:
+          MONGO_URI: mongodb://localhost:27017/canvasdb
+        run: npm test
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+        options: --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Backend Dependencies
+        run: cd naya-api && npm install
+
+      - name: Start Backend
+        run: cd naya-api && npm run start &
+        env:
+          MONGO_URI: mongodb://localhost:27017/canvasdb
+
+      - name: Install Frontend Dependencies
+        run: cd naya-web && npm ci
+
+      - name: Start Frontend
+        run: cd naya-web && HOST=localhost npm start &
+
+      - name: Wait for Services
+        run: sleep 15
+
+      - name: Install Playwright Browsers
+        run: cd naya-web && npx playwright install --with-deps
+
+      - name: Run Playwright Integration Tests
+        run: cd naya-web && npx playwright test --reporter=html
+
+      - name: Upload Playwright HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: naya-web/playwright-report
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, integration-tests]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Short Commit SHA
+        id: vars
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-south1-docker.pkg.dev
+
+      - name: Build & Push naya-api Image
+        run: |
+          cd naya-api
+          docker build -t $API_IMAGE:${{ steps.vars.outputs.sha }} .
+          docker push $API_IMAGE:${{ steps.vars.outputs.sha }}
+
+      - name: Build & Push naya-web Image
+        run: |
+          cd naya-web
+          docker build -t $WEB_IMAGE:${{ steps.vars.outputs.sha }} .
+          docker push $WEB_IMAGE:${{ steps.vars.outputs.sha }}
+
+      - name: Terraform Init & Apply
+        run: |
+          cd infra
+          terraform init
+          terraform apply -auto-approve -var="api_image_tag=${{ steps.vars.outputs.sha }}" -var="web_image_tag=${{ steps.vars.outputs.sha }}"
