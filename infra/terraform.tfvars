@@ -1,0 +1,7 @@
+project_id = "alien-handler-412515"
+image_tag = "latest"
+region     = "asia-south1"
+memory                = "512Mi"
+cpu                   = "1"
+min_scale             = "0"
+max_scale             = "3"
