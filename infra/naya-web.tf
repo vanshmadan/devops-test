@@ -13,5 +13,6 @@ module "naya_web" {
 
   env_vars = {
     NODE_ENV = "production"
+    REACT_APP_APIURL = "https://naya-api-769827417219.asia-south1.run.app"
   }
 }
