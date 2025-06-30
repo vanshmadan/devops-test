@@ -95,7 +95,7 @@ jobs:
 
       - name: Set Short Commit SHA
         id: vars
-        run: echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -108,14 +108,14 @@ jobs:
       - name: Build & Push naya-api Image
         run: |
           cd naya-api
-          docker build -t $API_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }} .
-          docker push $API_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }}
+          docker build -t $API_IMAGE:${{ steps.vars.outputs.sha }} .
+          docker push $API_IMAGE:${{ steps.vars.outputs.sha }}
 
       - name: Build & Push naya-web Image
         run: |
           cd naya-web
-          docker build -t $WEB_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }} .
-          docker push $WEB_IMAGE:${{ steps.vars.outputs.IMAGE_TAG }}
+          docker build -t $WEB_IMAGE:${{ steps.vars.outputs.sha }} .
+          docker push $WEB_IMAGE:${{ steps.vars.outputs.sha }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -126,4 +126,4 @@ jobs:
         run: |
           cd infra
           terraform init
-          terraform apply -auto-approve -var="mongo_uri=${{ env.MONGO_URI }}" -var="api_image_tag=${{ env.IMAGE_TAG }}" -var="web_image_tag=${{ env.IMAGE_TAG }}"
+          terraform apply -auto-approve -var="mongo_uri=${{ env.MONGO_URI }}" -var="api_image_tag=${{ steps.vars.outputs.sha }}" -var="web_image_tag=${{ steps.vars.outputs.sha }}"
