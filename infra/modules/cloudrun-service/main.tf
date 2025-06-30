@@ -7,8 +7,16 @@ resource "google_cloud_run_service" "this" {
       annotations = {
         "autoscaling.knative.dev/minScale" = var.min_scale
         "autoscaling.knative.dev/maxScale" = var.max_scale
+        "run.googleapis.com/network-interfaces" = jsonencode([
+          {
+            network    = "default"
+            subnetwork = "default"
+          }
+        ])             
+        "run.googleapis.com/vpc-access-egress"  = "all-traffic"
       }
     }
+
 
     spec {
       containers {
