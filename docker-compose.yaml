@@ -1,0 +1,16 @@
+services:
+  naya-api:
+    build:
+      context: ./naya-api
+    ports:
+      - "8080:8080"
+  
+  naya-web:
+    build:
+      context: ./naya-web
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://naya-api:8080
+    depends_on:
+      - naya-api
