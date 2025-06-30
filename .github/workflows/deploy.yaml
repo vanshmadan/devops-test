@@ -126,4 +126,4 @@ jobs:
         run: |
           cd infra
           terraform init
-          terraform apply -auto-approve -var="api_image_tag=${{ steps.vars.outputs.sha }}" -var="web_image_tag=${{ steps.vars.outputs.sha }}"
+          terraform apply -auto-approve -var="mongo_uri=${{ env.MONGO_URI }}" -var="api_image_tag=${{ env.IMAGE_TAG }}" -var="web_image_tag=${{ env.IMAGE_TAG }}"

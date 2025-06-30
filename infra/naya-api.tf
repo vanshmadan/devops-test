@@ -12,5 +12,6 @@ module "naya_api" {
 
   env_vars = {
     NODE_ENV = "production"
+    MONGO_URI = var.mongo_uri
   }
 }

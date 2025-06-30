@@ -32,6 +32,11 @@ variable "memory" {
   default     = "512Mi"
 }
 
+variable "mongo_uri" {
+  description = "MongoDB connection string"
+  type        = string
+}
+
 variable "cpu" {
   description = "CPU limit"
   type        = string
