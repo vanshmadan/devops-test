@@ -13,6 +13,23 @@ test.describe('Naya Login Page Tests', () => {
     await expect(page.locator('button:has-text("Login")')).toBeVisible();
   });
 
+  test('should prevent login without color', async ({ page }) => {
+    // Fill in valid username and password
+    await page.fill('input[placeholder="Username"]', 'testuser');
+    await page.fill('input[placeholder="Password"]', 'testpass');
+
+    // Attempt to login without selecting color
+    await page.click('button:has-text("Login")');
+
+
+    // check the URL remains the same
+    await expect(page).not.toHaveURL(/\/explore/);
+
+    // Optionally check for an error message (if your app shows one)
+    await expect(page.locator('.error-message')).toBeVisible();  // Adjust selector based on your app
+});
+
+
   test('should allow login with valid details', async ({ page }) => {
     await page.fill('input[placeholder="Username"]', 'testuser');
     await page.fill('input[placeholder="Password"]', 'testpass');
